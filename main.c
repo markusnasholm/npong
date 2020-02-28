@@ -1,0 +1,202 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ncurses.h>
+#include <string.h>
+#include <time.h>
+
+#define CLOCK       50000000L
+
+typedef struct racket{
+    int x,y;
+    int w, h;
+    bool player;
+} racket;
+
+typedef struct ball{
+    float x;
+    float y;
+    float speed[2];
+} ball;
+
+
+struct timespec ts = {0, 16666666L};
+//struct timespec ts = {0,   CLOCK};
+
+int draw(racket* rkts[2], ball b)
+{
+    mvprintw(b.y, b.x, "*");
+
+    int x,y;
+    for (int i = 0; i < 2; i++) {
+        for (x = rkts[i]->x; x < rkts[i]->x + rkts[i]->w; x++) {
+            mvprintw(rkts[i]->y, x, "#");
+        }
+        for (x = rkts[i]->x; x < rkts[i]->x + rkts[i]->w; x++) {
+            mvprintw(rkts[i]->y - 1 + rkts[i]->h, x, "#");
+        }
+        for (y = rkts[i]->y + 1; y < rkts[i]->y + rkts[i]->h - 1; y++) {
+            mvprintw(y, rkts[i]->x, "#");
+        }
+        for (y = rkts[i]->y + 1; y < rkts[i]->y + rkts[i]->h - 1; y++) {
+            mvprintw(y, rkts[i]->x + rkts[i]->w - 1, "#");
+        }
+    }
+    return 0;
+}
+
+int rmove(racket *r, int d, int row)
+{
+    if (r->y > 0 && r->y + r->h < row) {
+        r->y += d;
+        return d;
+    }
+    else {
+        if (r->y <= 0)
+            ++r->y;
+        if (r->y + r->h >= row)
+            --r->y;
+        return 0;
+    }
+};
+
+int bmove(ball* b, racket* rkts[2], int c, int r)
+{
+    b->x += b->speed[0];
+    b->y += b->speed[1];
+    if (b->x > c || b->x < 0)
+        return 1;
+
+    if (b->x >= rkts[1]->x)
+        if (b->y >= rkts[1]->y && b->y < rkts[1]->y + rkts[1]->h){
+            b->speed[0] = -b->speed[0];
+            if (b->y >= rkts[1]->y + (rkts[1]->h / 2))
+                b->speed[1] = 0.2;
+            else
+                b->speed[1] = -0.2;
+        }
+
+    if (b->x <= rkts[0]->x + rkts[0]->w - 1) {
+        if (b->y >= rkts[0]->y && b->y < rkts[0]->y + rkts[0]->h){
+            b->speed[0] = -b->speed[0];
+            if (b->y >= rkts[0]->y + (rkts[0]->h / 2))
+                b->speed[1] = 0.2;
+            else
+                b->speed[1] = -0.2;
+        }
+    }
+    if (b->y > r || b->y < 0)
+        b->speed[1] = -b->speed[1];
+
+    return 0;
+};
+
+//int collide(struct person *thing, struct coll_box *box)
+//{
+//    if (thing->x >= box->x && thing->x <= (box->x + box->w) && thing->y >= box->y && thing->y < (box->y + box->h)) {
+//        return 1;
+//    }
+//    else
+//        return 0;
+//}
+
+
+//int player_input (struct person *thing, char direction)
+//{
+//
+//    switch (direction) {
+//        case 'h':
+//        --(thing->x_speed);
+//            break;
+//        case 'l':
+//        ++(thing->x_speed);
+//            break;
+//        case 'k':
+//        thing->y_speed -= 6;
+//        //--(thing->y_speed);
+//            break;
+//        case 'j':
+//        ++(thing->y_speed);
+//            break;
+//    }
+//
+//    return 0;
+//}
+
+
+int main()
+{
+    //init ncurses
+    int row,col;
+    initscr();
+    getmaxyx(stdscr,row,col);
+    row--;
+    col--;
+    raw();
+    //cbreak();
+    timeout(0);
+    noecho();
+    curs_set(0);
+
+    ball b = {col/2, row/2, {1,0}};
+    
+    racket one = {0 + 6,0, 3, row/6, true};
+    racket two = {col - 8,0, 3, row/6, true};
+    one.y = (row/2) - one.h/2;
+    two.y = (row/2) - two.h/2;
+    racket* rackets[2] = {&one, &two};
+
+    int i = 0;
+    int debug = 0;
+    int key = 0;
+    int dir = 0;
+    while (1){
+        erase();
+
+        if ('q' == (key = getch()))
+            break;
+        else if ('d' == key){
+            if (!debug)
+                debug = 1;
+            else
+                debug = 0;
+        }
+        else if ('j' == key){
+            if (dir >= 0)
+                dir = 1;
+            else
+                dir = 0;
+        }
+        else if ('k' == key){
+            if (dir <= 0)
+                dir = -1;
+            else
+                dir = 0;
+        }
+        if (bmove(&b, rackets, col, row))
+            break;
+        for (int j = 0; j < 2; j++) {
+            if (rackets[j]->player){
+                dir = rmove(rackets[j], dir, row);
+            }
+        }
+
+
+
+
+
+        // Drawing:
+        draw(rackets, b);
+        if (debug) {
+            mvprintw(0, 1, "%d %d %d", i, col, row);
+            mvprintw(1, 1, "ONE %d %d %d", one.x, one.y, one.h);
+            mvprintw(2, 1, "TWO %d %d %d", two.x, two.y, one.h);
+        }
+        refresh();
+
+        nanosleep(&ts, NULL);
+        ++i;
+    }
+
+    endwin();
+    return 0;
+}
