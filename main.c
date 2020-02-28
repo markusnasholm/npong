@@ -90,38 +90,6 @@ int bmove(ball* b, racket* rkts[2], int c, int r)
     return 0;
 };
 
-//int collide(struct person *thing, struct coll_box *box)
-//{
-//    if (thing->x >= box->x && thing->x <= (box->x + box->w) && thing->y >= box->y && thing->y < (box->y + box->h)) {
-//        return 1;
-//    }
-//    else
-//        return 0;
-//}
-
-
-//int player_input (struct person *thing, char direction)
-//{
-//
-//    switch (direction) {
-//        case 'h':
-//        --(thing->x_speed);
-//            break;
-//        case 'l':
-//        ++(thing->x_speed);
-//            break;
-//        case 'k':
-//        thing->y_speed -= 6;
-//        //--(thing->y_speed);
-//            break;
-//        case 'j':
-//        ++(thing->y_speed);
-//            break;
-//    }
-//
-//    return 0;
-//}
-
 
 int main()
 {
