@@ -69,19 +69,15 @@ int bmove(ball* b, racket* rkts[2], int c, int r)
     if (b->x >= rkts[1]->x)
         if (b->y >= rkts[1]->y && b->y < rkts[1]->y + rkts[1]->h){
             b->speed[0] = -b->speed[0];
-            if (b->y >= rkts[1]->y + (rkts[1]->h / 2))
-                b->speed[1] = 0.2;
-            else
-                b->speed[1] = -0.2;
+            int m = rkts[1]->y + (rkts[1]->h / 2);
+            b->speed[1] += (b->y - m) / 10;
         }
 
     if (b->x <= rkts[0]->x + rkts[0]->w - 1) {
         if (b->y >= rkts[0]->y && b->y < rkts[0]->y + rkts[0]->h){
             b->speed[0] = -b->speed[0];
-            if (b->y >= rkts[0]->y + (rkts[0]->h / 2))
-                b->speed[1] = 0.2;
-            else
-                b->speed[1] = -0.2;
+            int m = rkts[0]->y + (rkts[0]->h / 2);
+            b->speed[1] += (b->y - m) / 10;
         }
     }
     if (b->y > r || b->y < 0)
@@ -158,6 +154,10 @@ int main()
             mvprintw(0, 1, "%d %d %d", i, col, row);
             mvprintw(1, 1, "ONE %d %d %d", one.x, one.y, one.h);
             mvprintw(2, 1, "TWO %d %d %d", two.x, two.y, one.h);
+            mvprintw(3, 1, "BAL %f", b.speed[1]);
+            mvprintw(4, 1, "BAL %f", b.y);
+            int m = two.y + (two.h / 2);
+            mvprintw(5, 1, "2_m %d", m);
         }
         refresh();
 
