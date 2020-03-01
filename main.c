@@ -66,14 +66,15 @@ int bmove(ball* b, racket* rkts[2], int c, int r)
     if (b->x > c || b->x < 0)
         return 1;
 
-    if (b->x >= rkts[1]->x)
+    if (b->x >= rkts[1]->x && b->x < rkts[1]->x + rkts[1]->w) {
         if (b->y >= rkts[1]->y && b->y < rkts[1]->y + rkts[1]->h){
             b->speed[0] = -b->speed[0];
             int m = rkts[1]->y + (rkts[1]->h / 2);
             b->speed[1] += (b->y - m) / 10;
         }
+    }
 
-    if (b->x <= rkts[0]->x + rkts[0]->w - 1) {
+    if (b->x <= rkts[0]->x + rkts[0]->w - 1 && b->x > rkts[0]->x) {
         if (b->y >= rkts[0]->y && b->y < rkts[0]->y + rkts[0]->h){
             b->speed[0] = -b->speed[0];
             int m = rkts[0]->y + (rkts[0]->h / 2);
@@ -103,7 +104,7 @@ int main()
 
     ball b = {col/2, row/2, {1,0}};
     
-    racket one = {0 + 6,0, 3, row/6, true};
+    racket one = {6,0, 3, row/6, true};
     racket two = {col - 8,0, 3, row/6, true};
     one.y = (row/2) - one.h/2;
     two.y = (row/2) - two.h/2;
