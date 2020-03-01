@@ -45,6 +45,15 @@ int draw(racket* rkts[2], ball b)
     return 0;
 }
 
+int rAI(racket* r, ball b) {
+    int m = r->y + (r->h / 2);
+    if (b.y > m)
+        r->dir = 1;
+    else
+        r->dir = -1;
+    return 0;
+}
+
 int rmove(racket* rkts[2], int row)
 {
     for (int i = 0; i < 2; i++) {
@@ -107,8 +116,8 @@ int main()
 
     ball b = {col/2, row/2, {1,0}};
     
-    racket one = {6,0, 3, row/6, 0, true};
-    racket two = {col - 8,0, 3, row/6, 0, false};
+    racket one = {6,0, 3, row/8, 0, true};
+    racket two = {col - 8,0, 3, row/8, 0, false};
     one.y = (row/2) - one.h/2;
     two.y = (row/2) - two.h/2;
     racket* rackets[2] = {&one, &two};
@@ -144,6 +153,9 @@ int main()
                         rackets[j]->dir = 0;
                 }
             }
+            else
+                rAI(rackets[j], b);
+            
         }
 
 
