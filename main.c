@@ -9,6 +9,7 @@
 typedef struct racket{
     int x,y;
     int w, h;
+    int dir;
     bool player;
 } racket;
 
@@ -44,19 +45,21 @@ int draw(racket* rkts[2], ball b)
     return 0;
 }
 
-int rmove(racket *r, int d, int row)
+int rmove(racket* rkts[2], int row)
 {
-    if (r->y > 0 && r->y + r->h < row) {
-        r->y += d;
-        return d;
+    for (int i = 0; i < 2; i++) {
+        if (rkts[i]->y > 0 && rkts[i]->y + rkts[i]->h < row) {
+            rkts[i]->y += rkts[i]->dir;
+        }
+        else {
+            if (rkts[i]->y <= 0)
+                ++rkts[i]->y;
+            if (rkts[i]->y + rkts[i]->h >= row)
+                --rkts[i]->y;
+            rkts[i]->dir = 0;
+        }
     }
-    else {
-        if (r->y <= 0)
-            ++r->y;
-        if (r->y + r->h >= row)
-            --r->y;
-        return 0;
-    }
+    return 0;
 };
 
 int bmove(ball* b, racket* rkts[2], int c, int r)
@@ -104,8 +107,8 @@ int main()
 
     ball b = {col/2, row/2, {1,0}};
     
-    racket one = {6,0, 3, row/6, true};
-    racket two = {col - 8,0, 3, row/6, true};
+    racket one = {6,0, 3, row/6, 0, true};
+    racket two = {col - 8,0, 3, row/6, 0, false};
     one.y = (row/2) - one.h/2;
     two.y = (row/2) - two.h/2;
     racket* rackets[2] = {&one, &two};
@@ -113,7 +116,6 @@ int main()
     int i = 0;
     int debug = 0;
     int key = 0;
-    int dir = 0;
     while (1){
         erase();
 
@@ -125,25 +127,33 @@ int main()
             else
                 debug = 0;
         }
-        else if ('j' == key){
-            if (dir >= 0)
-                dir = 1;
-            else
-                dir = 0;
-        }
-        else if ('k' == key){
-            if (dir <= 0)
-                dir = -1;
-            else
-                dir = 0;
-        }
-        if (bmove(&b, rackets, col, row))
-            break;
+
+
         for (int j = 0; j < 2; j++) {
-            if (rackets[j]->player){
-                dir = rmove(rackets[j], dir, row);
+            if (rackets[j]->player) {
+                if ('j' == key){
+                    if (rackets[j]->dir >= 0)
+                        rackets[j]->dir = 1;
+                    else
+                        rackets[j]->dir = 0;
+                }
+                else if ('k' == key){
+                    if (rackets[j]->dir <= 0)
+                        rackets[j]->dir = -1;
+                    else
+                        rackets[j]->dir = 0;
+                }
             }
         }
+
+
+
+
+
+        if (bmove(&b, rackets, col, row))
+            break;
+
+        rmove(rackets, row);
 
 
 
