@@ -4,7 +4,9 @@
 #include <string.h>
 #include <time.h>
 
-#define CLOCK       50000000L
+//#define CLOCK       50000000L
+#define CLOCK      16666666L
+
 
 typedef struct racket{
     int x,y;
@@ -19,9 +21,7 @@ typedef struct ball{
     float speed[2];
 } ball;
 
-
-struct timespec ts = {0, 16666666L};
-//struct timespec ts = {0,   CLOCK};
+struct timespec ts = {0,   CLOCK};
 
 int draw(racket* rkts[2], ball b)
 {
