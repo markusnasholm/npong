@@ -47,10 +47,16 @@ int draw(racket* rkts[2], ball b)
 
 int rAI(racket* r, ball b) {
     int m = r->y + (r->h / 2);
-    if (b.y > m)
-        r->dir = 1;
+    if (b.speed[0] > 0) {
+        if (b.y > m + 1)
+            r->dir = 1;
+        else if (b.y < m - 1)
+            r->dir = -1;
+        else
+            r->dir = 0;
+    }
     else
-        r->dir = -1;
+        r->dir = 0;
     return 0;
 }
 
