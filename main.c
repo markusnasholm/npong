@@ -7,6 +7,10 @@
 //#define CLOCK       50000000L
 #define CLOCK      16666666L
 
+typedef struct score{
+    int one;
+    int two;
+} score;
 
 typedef struct racket{
     int x,y;
@@ -81,8 +85,10 @@ int bmove(ball* b, racket* rkts[2], int c, int r)
 {
     b->x += b->speed[0];
     b->y += b->speed[1];
-    if (b->x > c || b->x < 0)
+    if (b->x > c) 
         return 1;
+    if (b->x < 0)
+        return 2;
 
     if (b->x >= rkts[1]->x && b->x < rkts[1]->x + rkts[1]->w) {
         if (b->y >= rkts[1]->y && b->y < rkts[1]->y + rkts[1]->h){
@@ -105,21 +111,8 @@ int bmove(ball* b, racket* rkts[2], int c, int r)
     return 0;
 };
 
-
-int main()
+int gameLoop(int col, int row, score score)
 {
-    //init ncurses
-    int row,col;
-    initscr();
-    getmaxyx(stdscr,row,col);
-    row--;
-    col--;
-    raw();
-    //cbreak();
-    timeout(0);
-    noecho();
-    curs_set(0);
-
     ball b = {col/2, row/2, {1,0}};
     
     racket one = {6,0, 3, row/8, 0, true};
@@ -129,10 +122,13 @@ int main()
     racket* rackets[2] = {&one, &two};
 
     int i = 0;
+    int result = 0;
     int debug = 0;
     int key = 0;
+
     while (1){
         erase();
+        mvprintw(0, (col/2 - 5), "%d | %d", score.one, score.two);
 
         if ('q' == (key = getch()))
             break;
@@ -161,20 +157,13 @@ int main()
             }
             else
                 rAI(rackets[j], b);
-            
         }
 
-
-
-
-
-        if (bmove(&b, rackets, col, row))
-            break;
+        result = bmove(&b, rackets, col, row);
+        if (result)
+            return result;
 
         rmove(rackets, row);
-
-
-
 
 
         // Drawing:
@@ -189,11 +178,40 @@ int main()
             mvprintw(5, 1, "2_m %d", m);
         }
         refresh();
-
         nanosleep(&ts, NULL);
         ++i;
     }
+    return 0;
+}
 
+int main()
+{
+    //init ncurses
+    int row,col;
+    initscr();
+    getmaxyx(stdscr,row,col);
+    row--;
+    col--;
+    raw();
+    timeout(0);
+    noecho();
+    curs_set(0);
+
+    score score = {0,0};
+    int result = 0;
+    bool game_over = false;
+
+    while ( !game_over ){
+        result = gameLoop(col, row, score);
+        if (result == 0)
+            game_over = true;
+        if (result == 1)
+            ++score.one;
+        if (result == 2)
+            ++score.two;
+        if (score.one > 3 || score.two > 3)
+            game_over = true;
+    }
     endwin();
     return 0;
 }
